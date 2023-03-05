@@ -108,3 +108,20 @@ export function eleChildren(node) {
   }
   return arr
 }
+
+// 查找子元素
+export function elemChildren(node) {
+  var temp = {
+    'length': 0,
+    'splice': Array.prototype.splice
+  },
+    len = node.childNodes.length;
+  for (var i = 0; i < len; i++) {
+    var childItem = node.childNodes[i];
+    if (childItem.nodeType === 1) {
+      temp[temp.length] = childItem;
+      temp['length']++
+    }
+  }
+  return temp
+}
