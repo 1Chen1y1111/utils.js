@@ -50,7 +50,11 @@ export function getScrollSize() {
   }
 }
 
-// 当前元素相对于父级定位节点的边界偏移的像素值
+/**
+ * 当前元素相对于父级定位节点的边界偏移的像素值
+ * @param {HTMLElement} el 当前元素节点
+ * @returns 
+ */
 export function getEleDocPosition(el) {
   var parent = el.offsetParent,
     offsetLeft = el.offsetLeft,
@@ -66,7 +70,12 @@ export function getEleDocPosition(el) {
   }
 }
 
-// 查看计算样式
+/**
+ * 查看计算样式
+ * @param {HTMLElement} ele   当前元素节点
+ * @param {*}           props 所要查看的计算样式
+ * @returns 
+ */
 export function getStyles(ele, props) {
   if (window.getComputedStyle) {
     if (props) {
@@ -83,7 +92,12 @@ export function getStyles(ele, props) {
   }
 }
 
-// 绑定事件处理函数
+/**
+ * 绑定事件处理函数
+ * @param {HTMLElement} el    当前元素节点
+ * @param {String}      type  所要绑定的事件名
+ * @param {Function}    fn    事件回调函数
+ */
 export function addEvent(el, type, fn) {
   if (el.addEventListener) {
     el.addEvenetListener(type, fn, false)
@@ -96,7 +110,11 @@ export function addEvent(el, type, fn) {
   }
 }
 
-// 获取元素节点
+/**
+ * 获取元素节点
+ * @param {HTMLElement} node 当前元素节点
+ * @returns 
+ */
 export function eleChildren(node) {
   var arr = [],
     children = node.childNodes
@@ -109,7 +127,11 @@ export function eleChildren(node) {
   return arr
 }
 
-// 查找子元素
+/**
+ * 查找子元素
+ * @param {HTMLElement} node 所要查找的元素节点
+ * @returns 
+ */
 export function elemChildren(node) {
   var temp = {
     'length': 0,
@@ -124,4 +146,24 @@ export function elemChildren(node) {
     }
   }
   return temp
+}
+
+/**
+ * 查找父级元素
+ * @param {HTMLElement} node 当前元素节点
+ * @param {Number}      n    第几个父级元素
+ */
+export function elemParent(node, n) {
+  var type = typeof (n);
+  if (type === 'undefined') {
+    return node.parentNode
+  } else if (n <= 0 || type !== 'number') {
+    return undefined
+  }
+
+  while (n) {
+    node = node.parentNode
+    n--
+  }
+  return node
 }
