@@ -1,4 +1,15 @@
-// 查看滚动条距离
+// 获取页面位置
+export function pagePos(e) {
+  var sLeft = getScrollOffset().left,
+    sTop = getScrollOffset().top,
+    cLeft = document.documentElement.clientLeft || 0,
+    cTop = document.documentElement.clientTop || 0;
+  return {
+    X: e.clientX + sLeft - cLeft,
+    Y: e.clientY + sTop - cTop,
+  }
+}
+// 获取滚动条距离
 export function getScrollOffset() {
   if (window.pageXOffset) {
     return {
@@ -71,9 +82,9 @@ export function getEleDocPosition(el) {
 }
 
 /**
- * 查看计算样式
+ * 获取样式属性
  * @param {HTMLElement} ele   当前元素节点
- * @param {*}           props 所要查看的计算样式
+ * @param {*}           props 所要获取的计算样式
  * @returns 
  */
 export function getStyles(ele, props) {
@@ -184,4 +195,30 @@ export function elemParent(node, n) {
     n--
   }
   return node
+}
+
+/**
+ * 取消冒泡行为
+ * @param {Event} e 事件
+ */
+export function cancelBubble(e) {
+  var e = e || window.event;
+  if (e.stopPropagation) {
+    e.stopPropagation()
+  } else {
+    e.cancelBubble = true
+  }
+}
+
+/**
+ * 阻止默认行为
+ * @param {Event} e 事件
+ */
+export function preventDefaultEvent(e) {
+  var e = e || window.event;
+  if (e.preventDefaultEvent) {
+    e.preventDefaultEvent()
+  } else {
+    event.returnValue = false
+  }
 }
