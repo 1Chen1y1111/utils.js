@@ -100,13 +100,31 @@ export function getStyles(ele, props) {
  */
 export function addEvent(el, type, fn) {
   if (el.addEventListener) {
-    el.addEvenetListener(type, fn, false)
+    el.addEventListener(type, fn, false)
   } else if (el.attachEvent) {
-    el.attachEventt('on' + type, function () {
+    el.attachEvent('on' + type, function () {
       fn.call(el)
     })
   } else {
     el['on' + type] = fn
+  }
+}
+
+/**
+ * 绑定事件处理函数
+ * @param {HTMLElement} el    当前元素节点
+ * @param {String}      type  所要绑定的事件名
+ * @param {Function}    fn    事件回调函数
+ */
+export function removeEvent(el, type, fn) {
+  if (el.addEventListener) {
+    el.removeEventListener(type, fn, false)
+  } else if (el.attachEvent) {
+    el.detachEvent('on' + type, function () {
+      fn.call(el)
+    })
+  } else {
+    el['on' + type] = null
   }
 }
 
