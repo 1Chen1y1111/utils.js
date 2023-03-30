@@ -577,3 +577,211 @@ export function networkType() {
       return 'Unknown network'
   }
 }
+
+Array.prototype.jForEach = function (fn) {
+  var arr = this,
+    len = arr.length,
+    arg2 = arguments[1] || window;
+  for (var i = 0; i < len; i++) {
+    fn.apply(arg2, [arr[i], i, arr])
+  }
+}
+
+Array.prototype.jFilter = function (fn) {
+  var arr = this,
+    len = arr.length,
+    arg2 = arguments[1] || window,
+    nArr = [],
+    nItem;
+  for (var i = 0; i < len; i++) {
+    nItem = tools.deepClone(arr[i], {})
+    fn.apply(arg2, [nItem, i, arr]) ? nArr.push(nItem) : ''
+  }
+  return nArr
+}
+
+Array.prototype.jMap = function (fn) {
+  var arr = this,
+    len = arr.length,
+    arg2 = arguments[1] || window,
+    nArr = [],
+    nItem;
+  for (var i = 0; i < len; i++) {
+    nItem = tools.deepClone(arr[i], {})
+    nArr.push(fn.apply(arg2, [nItem, i, arr], {}))
+  }
+  return nArr
+}
+
+Array.prototype.jReduce = function (fn, initialVal) {
+  var arr = this,
+    len = arr.length,
+    arg2 = arguments[2] || window;
+  for (var i = 0; i < len; i++) {
+    initialVal = fn.apply(arg2, [initialVal, arr[i], i, arr])
+  }
+  return initialVal
+}
+
+var tools = {
+  deepClone: function (org, tar) {
+    var tar = tar || {}
+    var toStr = Object.prototype.toString
+    var arrType = '[Object Array]'
+    for (var key in org) {
+      if (org.hasOwnProperty(key)) {
+        if (typeof (org[key]) === 'object' && org[key] !== null) {
+          tar[key] = toStr.call(org[key] === arrType ? [] : {})
+          this.deepClone(org[key], tar[key])
+        } else {
+          tar[key] = org[[key]]
+        }
+      }
+    }
+    return tar
+  },
+  regTpl: function () {
+    return /{{(.*?)}}/g;
+  },
+  trimSpace: function (str) {
+    return str.replace(/\s/g, '')
+  }
+}
+
+/**
+ * 函数防抖
+ * @param {Function} fn 回调
+ * @param {Number} delay 延迟时间
+ * @param {Boolean} immediate 是否首次延迟执行、n秒内频繁触发事件,计时器会频繁重新开始计时
+ */
+export function debounce(fn, delay, immediate) {
+  var timer = null
+
+  var debounced = function () {
+    var _self = this,
+      args = arguments;
+
+    if (timer) {
+      clearTimeout(timer)
+    }
+
+    if (immediate) {
+      var exec = !timer
+
+      timer = setTimeout(() => {
+        timer = null
+      }, delay);
+
+      if (exec) {
+        fn.apply(_self, args)
+      }
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(_self, args)
+      }, delay);
+    }
+  }
+
+  debounced.remove = function () {
+    clearTimeout(timer)
+    timer = null
+  }
+
+  return debounced
+}
+
+/**
+ * 函数节流
+ * @param {Function} fn 回调
+ * @param {Number} delay 延迟时间
+ * @returns 
+ */
+export function throttle(fn, delay) {
+  var timer = null,
+    begin = new Date().getTime();
+
+  return function () {
+    var _self = this,
+      args = arguments,
+      cur = new Date().getTime();
+
+    clearTimeout(timer)
+
+    if (cur - begin > delay) {
+      fn.apply(_self, args)
+      begin = cur
+    } else {
+      timer = setTimeout(() => {
+        fn.apply(_self, args)
+      }, delay);
+    }
+  }
+}
+
+/**
+ * 归类函数
+ * @param {Array} sort 
+ * @param {Array} data 
+ * @param {String} foreign_key 分类key
+ * @param {String} sortType single | multi  
+ * @returns 
+ */
+export function sortData(sort, data) {
+  var cache = {}
+
+  return function (foreign_key, sortType) {
+    if (sortType !== 'single' && sortType !== 'multi') {
+      console.log(new Error('Invalid sort type.[Only "single" and "multi" are valid values]'));
+      return
+    }
+    sort.forEach(function (sort) {
+      var _id = sort.id
+      cache[_id] = []
+      data.forEach(function (elem) {
+        var foreign_val = elem[foreign_key]
+        switch (sortType) {
+          case "single":
+            if (foreign_val == _id) {
+              cache[_id].push(elem)
+            }
+            break;
+          case 'multi':
+            var _arr = foreign_val.split(',')
+            _arr.forEach(function (val) {
+              if (val == _id) {
+                cache[_id].push(elem)
+              }
+            })
+            break;
+          default:
+            break;
+        }
+      })
+    })
+    return cache
+  }
+}
+
+/**
+ * 数组扁平化
+ * @param {Array} arr 
+ * @returns 
+ */
+export function flatten(arr) {
+  var _arr = arr || [],
+    fArr = [],
+    len = _arr.length,
+    item;
+  for (var i = 0; i < len; i++) {
+    item = _arr[i]
+    if (_isArr(item)) {
+      fArr = fArr.concat(flatten(item))
+    } else {
+      fArr.push(item)
+    }
+  }
+  return fArr
+  function _isArr(obj) {
+    return Object.prototype.toString.call(obj) === '[Object Array]'
+  }
+}
