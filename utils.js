@@ -767,7 +767,7 @@ export function sortData(sort, data) {
  * @param {Array} arr 
  * @returns 
  */
-export function flatten(arr) {
+export function flatten1(arr) {
   var _arr = arr || [],
     fArr = [],
     len = _arr.length,
@@ -785,3 +785,107 @@ export function flatten(arr) {
     return Object.prototype.toString.call(obj) === '[Object Array]'
   }
 }
+export function flatten2(arr) {
+  var _arr = arr || [],
+    toStr = {}.toString,
+    fArr = [];
+
+  _arr.forEach(function (elem) {
+    toStr.call(elem) === '[Object Array]'
+      ? fArr = fArr.concat(flatten2())
+      : fArr.push(elem)
+  })
+  return fArr
+}
+export function flatten3(arr) {
+  var _arr = arr || [],
+    toStr = {}.toString,
+    fArr = [];
+
+  return _arr.reduce(function (prev, elem) {
+    return prev.concat = toStr.call(elem) === '[Object Array]'
+      ? flatten3(elem)
+      : elem
+  })
+}
+const flatten4 = arr =>
+  arr.reduce((prev, elem) => prev.concat(
+    {}.toString().call(elem) === '[Object Array]'
+      ? flatten4(elem)
+      : elem
+  ), [])
+
+
+// 原生ajax
+export default xhr = (function () {
+  var o = window.XMLHttpRequest
+    ? new XMLHttpRequest()
+    : new ActiveXObject('Microsoft.XMLHTTP');
+  if (!o) {
+    throw new Error('您的浏览器不支持异步发起HTTP请求')
+  }
+  function _adAjax(opt) {
+    var opt = opt || {},
+      type = (opt.type || 'GET').toUpperCase(),
+      async = opt.async || true,
+      url = opt.url,
+      data = opt.data || null,
+      success = opt.success || function () { },
+      error = opt.error || function () { },
+      complete = opt.complete || function () { };
+
+    if (!url) {
+      throw new Error('您没有填写URL地址,请输入URL地址')
+    }
+
+    o.open(type, url, async)
+
+    type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www-urlencoded')
+
+    o.send(type === 'GET' ? null : formatData(data))
+
+    o.onreadystatechange = function () {
+      if (o.readyState === 4 && o.status === 200) {
+        success(JSON.parse(o.responseText))
+      }
+
+      if (o.status === 404) {
+        error
+      }
+
+      complete()
+    }
+  }
+
+  // POST请求需要处理数据
+  function formatData(obj) {
+    var str = '';
+    for (var key in obj) {
+      str += key + '=' + obj[key] + '&'
+    }
+    return str.replace(/&$/, '')
+  }
+
+  return {
+    ajax: function (opt) {
+      _adAjax(opt)
+    },
+
+    post: function (url, data, callback) {
+      _adAjax({
+        type: 'POST',
+        url: url,
+        data: data,
+        success: callback
+      })
+    },
+
+    get: function (url, callback) {
+      _adAjax({
+        type: 'GET',
+        url: url,
+        success: callback
+      })
+    }
+  }
+})()
