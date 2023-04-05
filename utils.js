@@ -818,18 +818,24 @@ const flatten4 = arr =>
 
 // 原生ajax
 export default xhr = (function () {
-  var o = window.XMLHttpRequest
-    ? new XMLHttpRequest()
-    : new ActiveXObject('Microsoft.XMLHTTP');
-  if (!o) {
-    throw new Error('您的浏览器不支持异步发起HTTP请求')
-  }
   function _adAjax(opt) {
+    var o = window.XMLHttpRequest
+      ? new XMLHttpRequest()
+      : new ActiveXObject('Microsoft.XMLHTTP');
+
+    var t = null;
+
+    if (!o) {
+      throw new Error('您的浏览器不支持异步发起HTTP请求')
+    }
+
     var opt = opt || {},
       type = (opt.type || 'GET').toUpperCase(),
-      async = opt.async || true,
+      async = '' + opt.async === 'false' ? false : true,
+      dataType = opt.dataType || 'JSON',
       url = opt.url,
       data = opt.data || null,
+      timeout = opt.timeout || 30000,
       success = opt.success || function () { },
       error = opt.error || function () { },
       complete = opt.complete || function () { };
@@ -838,23 +844,46 @@ export default xhr = (function () {
       throw new Error('您没有填写URL地址,请输入URL地址')
     }
 
+    o.onreadystatechange = function () {
+      if (o.readyState === 4) {
+        if ((o.status >= 200 && o.status < 300) || o.status === 304) {
+          switch (dataType.toUpperCase()) {
+            case 'JSON':
+              success(JSON.parse(o.responseText))
+              break;
+            case 'TEXT':
+              success(o.responseText)
+              break;
+            case 'XML':
+              success(o.responseXML)
+              break;
+            default:
+              success(JSON.parse(o.responseText))
+          }
+        } else {
+          error()
+        }
+        complete()
+        clearTimeout(t)
+        t = null
+        o = null
+      }
+    }
+
     o.open(type, url, async)
 
-    type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www-urlencoded')
+    type === 'POST' && o.setRequestHeader('Content-type', 'application/x-www-form-urlencoded')
 
     o.send(type === 'GET' ? null : formatData(data))
 
-    o.onreadystatechange = function () {
-      if (o.readyState === 4 && o.status === 200) {
-        success(JSON.parse(o.responseText))
-      }
-
-      if (o.status === 404) {
-        error
-      }
-
-      complete()
-    }
+    t = setTimeout(() => {
+      o.abort()
+      clearTimeout(t)
+      t = null
+      o = null
+      // complete()
+      throw new Error('This request has been timeout for ' + url)
+    }, timeout);
   }
 
   // POST请求需要处理数据
